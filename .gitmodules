@@ -1,0 +1,3 @@
+[submodule "lib/Protocol"]
+	path = lib/Protocol
+	url = https://github.com/TeamSunride/Protocol

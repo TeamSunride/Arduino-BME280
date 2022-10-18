@@ -5,6 +5,7 @@
 #ifndef BME80_REGISTERS_H
 #define BME80_REGISTERS_H
 
+// datasheet: https://www.mouser.com/datasheet/2/783/BST-BME280-DS002-1509607.pdf
 
 enum BME80_REGISTERS {
     hum_lsb             = 0xFE, // reset reg: 0x00
@@ -19,7 +20,7 @@ enum BME80_REGISTERS {
     ctrl_meas           = 0xF4, // reset reg: 0x00
     status              = 0xF3, // reset reg: 0x00
     ctrl_hum            = 0xF2, // reset reg: 0x00
-    // calib26..calib41    = 0xE1...0xF0, reset reg: 'individual'
+    // calib26..calib41 = 0xE1...0xF0, reset reg: 'individual'
     reset               = 0xE0, // reset reg: 0x00
     id                  = 0xD0, // reset reg: 0x60
     // calib00..calib25 = 0x88...0xA1 reset reg: 'individual'
