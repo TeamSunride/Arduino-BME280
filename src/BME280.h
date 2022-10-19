@@ -13,6 +13,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include "BME280_registers.h"
+#include "BME280_constants.h"
 
 #define DEBUG Serial.printf("%s %d\n", __FILE__, __LINE__)
 
@@ -21,14 +22,14 @@ protected:
 
     protocol *device;
 
-    /*float CalculateTemperature(
+    float CalculateTemperature(
             int32_t raw,
             int32_t& t_fine,
             TempUnit unit = TempUnit_Celsius);
 
     /////////////////////////////////////////////////////////////////
     /// Calculate the humidity from the BME280 raw data and BME280
-    /// trim, return a float.
+    /// configure, return a float.
     float CalculateHumidity(
             int32_t raw,
             int32_t t_fine);
@@ -94,19 +95,4 @@ public:
 
         byte who_am_i();
 
-        uint8_t ctrl_status(bool onoroff);
-
-        /*uint8_t enable_temp_sensor(bool enable);
-
-        uint8_t enable_hum_sensor(bool enable);
-
-        uint8_t enable_press_sensor(bool enable);
-
-        uint8_t set_operating_mode(BME280_OPERATING_MODE Mode);*/
         byte software_reset();
-
-        bool ReadTrim();
-
-        bool ReadData(
-                int32_t data[8]);
-    }

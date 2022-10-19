@@ -2,12 +2,12 @@
 // Created by Max Bird on 12/10/2022.
 //
 
-#ifndef BME80_REGISTERS_H
-#define BME80_REGISTERS_H
+#ifndef BME280_REGISTERS_H
+#define BME280_REGISTERS_H
 
 // datasheet: https://www.mouser.com/datasheet/2/783/BST-BME280-DS002-1509607.pdf
 
-enum BME80_REGISTERS {
+enum BME280_REGISTERS {
     hum_lsb             = 0xFE, // reset reg: 0x00
     hum_msb             = 0xFD, // reset reg: 0x80
     temp_xlsb           = 0xFC, // reset reg: 0x00
@@ -22,9 +22,10 @@ enum BME80_REGISTERS {
     ctrl_hum            = 0xF2, // reset reg: 0x00
     // calib26..calib41 = 0xE1...0xF0, reset reg: 'individual'
     reset               = 0xE0, // reset reg: 0x00
+    RESET_VALUE	        = 0xB6, // When written to reset reg, resets sensor
     id                  = 0xD0, // reset reg: 0x60
     // calib00..calib25 = 0x88...0xA1 reset reg: 'individual'
 };
 
-#endif //BME80_REGISTERS_H
+#endif //BME280_REGISTERS_H
 
