@@ -3,24 +3,11 @@
 //
 #include "BME280.h"
 #include "BME280_constants.h"
+#include "BME280_registers.h"
 
-
-byte BME280::read_reg(BME280_REGISTER regAddress) {
-    return device->read_reg(regAddress);
+byte BME280::who_am_i() {
+    return byte data = device->read_reg(BME280_REGISTERS::id);
 }
-
-void BME280::read_regs(BME280_REGISTER regAddress, byte *outputPointer, uint length) {
-    return device->read_regs(regAddress, outputPointer, length);
-}
-
-uint8_t BME280::write_reg(BME280_REGISTER regAddress, byte data) {
-    return device->write_reg(regAddress, data);
-}
-
-uint8_t BME280::write_regs(BME280_REGISTER regAddress, byte *data, uint length) {
-    return device->write_regs(regAddress, data, length);
-}
-
 
 /*bool BME280::Initialize()
 {
@@ -32,18 +19,45 @@ uint8_t BME280::write_regs(BME280_REGISTER regAddress, byte *data, uint length) 
     {
         success &= ReadTrim();
 
-        //if(m_settings.filter != Filter_Off)
+        if(m_settings.filter != Filter_Off)
         {
-            //InitializeFilter();
+            InitializeFilter();
         }
 
-        //WriteSettings();
+        WriteSettings();
     }
 
     m_initialized = success;
 
     return m_initialized;
 }*/
+
+//---------------------------------------------Initialisation----------------------------------------------------------
+
+
+/*void BME280::InitializeFilter()
+{
+    // Force an unfiltered measurement to populate the filter buffer.
+    // This fixes a bug that causes the first read to always be 28.82 °C 81732.34 hPa.
+    Filter filter = m_settings.filter;
+    m_settings.filter = Filter_Off;
+
+    WriteSettings();
+
+    float dummy;
+    read(dummy, dummy, dummy);
+
+    m_settings.filter = filter;
+}*/
+
+bool BME280::get_status(){
+    byte data = device->read_reg(BME280_REGISTERS::status);
+    return getBit(data, 2);
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
 
 //----------------------------------------------COMMUNICATIONS PROTOCOLS-----------------------------------------------
 BME280::BME280(TwoWire *pipe, uint32_t freq) { // constructor for I2C protocol
@@ -55,134 +69,41 @@ BME280::BME280(byte chipSelect, SPIClass& spi, uint freq) { // constructor for S
 
     SPISettings settings = SPISettings(freq, MSBFIRST, SPI_MODE3);
     device = new SPIProtocol(chipSelect, spi, settings, READ_BYTE, WRITE_BYTE);
-
 }
-//----------------------------------------------a BUNCH of FUNCTIONS---------------------------------------------------
+//---------------------------------------------Sensor Initilisation---------------------------------------------------
 
-byte BME280::who_am_i() {
-    return byte data = device->read_reg(BME280_REGISTERS::id);
-}
-
-byte BME280::software_reset() {
-    byte data = device->read_reg(BME280_REGISTERS::reset);
-
-    return device->write_reg(BME280_CONSTANTS::RESET_VALUE); // or reset sensor somehow
+uint8_t BME280::enable_temp_sensor(bool enable) {
+    byte data = device->read_reg(BME280_REGISTERS::ctrl_meas);
+    // do ctrl_hum first
 }
 
-uint8_t BME280::default_configuration() {
-    software_reset();
-    //sensors off
-    //etc
+uint8_t BME280::enable_press_sensor(bool enable){
+
 }
 
-//======================================================================================================================
-//Configuring data
+uint8_t BME280::enable_hum_sensor(bool enable) {
 
-///==============================================================================================================
-
-float BME280_SENSOR_MEASUREMENTS::CalculateHumidity(int32_t raw, int32_t t_fine)     //copied from https://github.com/finitespace/BME280/blob/master/src/BME280.cpp
-
-{
-    // Code based on calibration algorthim provided by Bosch.
-    int32_t var1;
-    uint8_t   dig_H1 =   m_dig[24];
-    int16_t dig_H2 = (m_dig[26] << 8) | m_dig[25];
-    uint8_t   dig_H3 =   m_dig[27];
-    int16_t dig_H4 = ((int8_t)m_dig[28] * 16) | (0x0F & m_dig[29]);
-    int16_t dig_H5 = ((int8_t)m_dig[30] * 16) | ((m_dig[29] >> 4) & 0x0F);
-    int8_t   dig_H6 =   m_dig[31];
-
-    var1 = (t_fine - ((int32_t)76800));
-    var1 = (((((raw << 14) - (((int32_t)dig_H4) << 20) - (((int32_t)dig_H5) * var1)) +
-              ((int32_t)16384)) >> 15) * (((((((var1 * ((int32_t)dig_H6)) >> 10) * (((var1 *
-                  ((int32_t)dig_H3)) >> 11) + ((int32_t)32768))) >> 10) + ((int32_t)2097152)) *
-                       ((int32_t)dig_H2) + 8192) >> 14));
-    var1 = (var1 - (((((var1 >> 15) * (var1 >> 15)) >> 7) * ((int32_t)dig_H1)) >> 4));
-    var1 = (var1 < 0 ? 0 : var1);
-    var1 = (var1 > 419430400 ? 419430400 : var1);
-
-    return ((uint32_t)(var1 >> 12))/1024.0;
 }
+//---------------------------------------------Configure data---------------------------------------------------------
 
-float BME280_SENSOR_MEASUREMENTS::CalculateTemperature              //copied from https://github.com/finitespace/BME280/blob/master/src/BME280.cpp
-        (
-                int32_t raw,
-                int32_t& t_fine,
-                TempUnit unit
-        )
-{
-    // Code based on calibration algorithim provided by Bosch.
-    int32_t var1, var2, final;
-    uint16_t dig_T1 = (m_dig[1] << 8) | m_dig[0];
-    int16_t   dig_T2 = (m_dig[3] << 8) | m_dig[2];
-    int16_t   dig_T3 = (m_dig[5] << 8) | m_dig[4];
-    var1 = ((((raw >> 3) - ((int32_t)dig_T1 << 1))) * ((int32_t)dig_T2)) >> 11;
-    var2 = (((((raw >> 4) - ((int32_t)dig_T1)) * ((raw >> 4) - ((int32_t)dig_T1))) >> 12) * ((int32_t)dig_T3)) >> 14;
+float calcTemp(byte t_fine){
+
+    BME280_S32_t var1, var2, T;
+    var1 = ((((adc_T>>3) – ((BME280_S32_t)dig_T1<<1))) * ((BME280_S32_t)dig_T2)) >> 11;
+    var2 = (((((adc_T>>4) – ((BME280_S32_t)dig_T1)) * ((adc_T>>4) – ((BME280_S32_t)dig_T1)))
+    >> 12) *
+            ((BME280_S32_t)dig_T3)) >> 14;
     t_fine = var1 + var2;
-    final = (t_fine * 5 + 128) >> 8;
-    return unit == TempUnit_Celsius ? final/100.0 : final/100.0*9.0/5.0 + 32.0;
+    T = (t_fine * 5 + 128) >> 8;
+    return T;
 }
-
-float BME280_SENSOR_MEASUREMENTS::CalculatePressure                  //copied from https://github.com/finitespace/BME280/blob/master/src/BME280.cpp
-        (
-                int32_t raw,
-                int32_t t_fine,
-                PresUnit unit
-        ) {
-    // Code based on calibration algorthim provided by Bosch.
-    int64_t var1, var2, pressure;
-    float final;
-
-    uint16_t dig_P1 = (m_dig[7] << 8) | m_dig[6];
-    int16_t dig_P2 = (m_dig[9] << 8) | m_dig[8];
-    int16_t dig_P3 = (m_dig[11] << 8) | m_dig[10];
-    int16_t dig_P4 = (m_dig[13] << 8) | m_dig[12];
-    int16_t dig_P5 = (m_dig[15] << 8) | m_dig[14];
-    int16_t dig_P6 = (m_dig[17] << 8) | m_dig[16];
-    int16_t dig_P7 = (m_dig[19] << 8) | m_dig[18];
-    int16_t dig_P8 = (m_dig[21] << 8) | m_dig[20];
-    int16_t dig_P9 = (m_dig[23] << 8) | m_dig[22];
-
-    var1 = (int64_t) t_fine - 128000;
-    var2 = var1 * var1 * (int64_t) dig_P6;
-    var2 = var2 + ((var1 * (int64_t) dig_P5) << 17);
-    var2 = var2 + (((int64_t) dig_P4) << 35);
-    var1 = ((var1 * var1 * (int64_t) dig_P3) >> 8) + ((var1 * (int64_t) dig_P2) << 12);
-    var1 = (((((int64_t) 1) << 47) + var1)) * ((int64_t) dig_P1) >> 33;
-    if (var1 == 0) { return NAN; }                                                         // Don't divide by zero.
-    pressure = 1048576 - raw;
-    pressure = (((pressure << 31) - var2) * 3125) / var1;
-    var1 = (((int64_t) dig_P9) * (pressure >> 13) * (pressure >> 13)) >> 25;
-    var2 = (((int64_t) dig_P8) * pressure) >> 19;
-    pressure = ((pressure + var1 + var2) >> 8) + (((int64_t) dig_P7) << 4);
-
-    final = ((uint32_t) pressure) / 256.0;
 }
-    switch(unit){
-        case PresUnit_hPa: /* hPa */
-            final /= 100.0;
-            break;
-        case PresUnit_inHg: /* inHg */
-            final /= 3386.3752577878;          /* final pa * 1inHg/3386.3752577878Pa */
-            break;
-        case PresUnit_atm: /* atm */
-            final /= 101324.99766353; /* final pa * 1 atm/101324.99766353Pa */
-            break;
-        case PresUnit_bar: /* bar */
-            final /= 100000.0;               /* final pa * 1 bar/100kPa */
-            break;
-        case PresUnit_mbar: /* mbar */
-            final /= 100.0;               /* final pa * 1 bar/100Pa */
-            break;
-        case PresUnit_torr: /* torr */
-            final /= 133.32236534674;            /* final pa * 1 torr/133.32236534674Pa */
-            break;
-        case PresUnit_psi: /* psi */
-            final /= 6894.744825494;   /* final pa * 1psi/6894.744825494Pa */
-            break;
-        default: /* Pa (case: 0) */
-            break;
-    }
-    return final;
-}
+//---------------------------------------------Get data---------------------------------------------------------------
 
+uint32_t getTemperature(){
+    short msb = device->read_reg(BME280_REGISTERS::temp_msb);
+    short lsb = device->read_reg(BME280_REGISTERS::temp_lsb);
+    short xlsb = device->read_reg(BME280_REGISTERS::temp_xlsb);
+
+
+}
