@@ -12,7 +12,6 @@
 #include "BME280_registers.h"
 #include "BME280_constants.h"
 
-#define DEBUG Serial.printf("%s %d\n", __FILE__, __LINE__)
 
 class BME280{
 protected:
@@ -42,35 +41,33 @@ public:
         // any other set up etc
     }
 
+    uint8_t software_reset();
 
-    // SENSOR ENABLES
+    byte who_am_i();
 
-    uint8_t enable_temp_sensor(bool enable);
-    uint8_t enable_press_sensor(bool enable);
-    uint8_t enable_hum_sensor(bool enable);
 
+    short ctrlhum(short osr = BME280_CONSTANTS::OSR_RATE_1);
+    //short ctrlmeas(//some setup);
+
+    // GETS
+
+    uint32_t getTemperature();
+    uint32_t getPressure();
+    uint32_t getHumidity();
     // ENUMS
 
     enum Mode
     {
         Mode_Sleep  = 0,
         Mode_Forced = 1,
-        Mode_Normal = 3
+        Mode_Normal = 3 // out 11, return 00
     };
 
-    enum TempUnit
-    {
-        TempUnit_Celsius,
-        TempUnit_Fahrenheit
+
+
+
     };
 
-    // More bools
-
-    uint8_t software_reset();
-
-    byte who_am_i();
-
-    bool get_status();
 };
 
 #endif //ARDUINO_BME280_BME280_H
