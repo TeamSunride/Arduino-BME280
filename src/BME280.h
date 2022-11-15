@@ -45,15 +45,17 @@ public:
 
     byte who_am_i();
 
+    bool get_status(bool enable);
+
 
     short ctrlhum(short osr = BME280_CONSTANTS::OSR_RATE_1);
     //short ctrlmeas(//some setup);
 
     // GETS
 
-    uint32_t getTemperature();
-    uint32_t getPressure();
-    uint32_t getHumidity();
+    float getTemperature();
+    float getPressure();
+    float getHumidity();
     // ENUMS
 
     enum Mode
@@ -65,8 +67,7 @@ public:
 
 
 
-
-    };
+};
 
 };
 

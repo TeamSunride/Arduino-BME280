@@ -49,6 +49,7 @@ enum BME280_DIG_REGISTERS {
     H_DIG3                          = 0xE3,
     H_DIG4                          = 0xE4,
     H_DIG5                          = 0xE5,
+    H_DIG6                          = 0xE7
 };
 
 #endif //BME280_REGISTERS_H
