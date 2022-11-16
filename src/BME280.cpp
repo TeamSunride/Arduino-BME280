@@ -11,7 +11,7 @@ byte BME280::who_am_i() {
     return data = device->read_reg(BME280_REGISTERS::id);
 }
 
-byte BME280::software_reset() {
+void BME280::software_reset() {
     int current_mode = Mode::Mode_Sleep;
     device->write_reg(BME280_REGISTERS::reset, BME280_REGISTERS::RESET_VALUE);
 }
@@ -29,14 +29,16 @@ byte BME280::software_reset() {
     float dummy;
     read(dummy, dummy, dummy);
 
-    m_settings.filter = filter;
+    //m_settings.filter = filter;
 }*/
 
-bool BME280::get_status(bool enable){
+void BME280::set_status(int pos, int val){
     byte data = device->read_reg(BME280_REGISTERS::status);
-    setBit(&data, 3, enable);
-    return device->write_reg(BME280_REGISTERS::status, data);
+    setBit(&data, pos, val);
+    device->write_reg(BME280_REGISTERS::status, data);
 }
+
+
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -55,20 +57,21 @@ BME280::BME280(byte chipSelect, SPIClass& spi, uint freq) { // constructor for S
 
 //---------------------------------------------Sensor Setup---------------------------------------------------
 
-short BME280::ctrlhum(short osr){
-    short data = osr;
-    device->write_reg(BME280_REGISTERS::ctrl_hum, data);
+void BME280::writeSettings() {
+
+    uint8_t ctrlHum, config, ctrlMeas;
+
+    device->write_reg(BME280_REGISTERS::ctrl_hum, ctrlHum);
+    device->write_reg(BME280_REGISTERS::config, config);
+    device->write_reg(BME280_REGISTERS::ctrl_meas, ctrlMeas);
 }
-
-//short BME280::ctrlmeas(short setup /* or something*/){}
-
 
 //---------------------------------------------Configure data---------------------------------------------------------
 
 // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
 // t_fine carries fine temperature as global value
 int32_t t_fine;
-float configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short dig_T3){
+float BME280:: configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short dig_T3){
 
     int32_t var1, var2, T;
 
@@ -77,6 +80,7 @@ float configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short di
 
     t_fine = var1 + var2;
     T = (t_fine * 5 + 128) >> 8;
+    set_status(3, 0);
     return T;
 }
 
@@ -135,6 +139,8 @@ float BME280::getTemperature(){
     unsigned short dig_T1 = device->read_reg(BME280_DIG_REGISTERS::T_DIG1);
     short dig_T2 = device->read_reg(BME280_DIG_REGISTERS::T_DIG2);
     short dig_T3 = device->read_reg(BME280_DIG_REGISTERS::T_DIG3);
+
+    set_status(3, 1);
     return configureTemp(Temp, dig_T1, dig_T2, dig_T3);
 }
 
@@ -176,3 +182,4 @@ float BME280::getHumidity(){
 
     return configureHum(Hum, dig_H1, dig_H2, dig_H3, dig_H4, dig_H5, dig_H6);
 }
+
