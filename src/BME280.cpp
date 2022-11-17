@@ -24,12 +24,12 @@ void BME280::software_reset() {
     // This fixes a bug that causes the first read to always be 28.82 °C 81732.34 hPa.
     int current_mode = BME280::Mode(Mode_Normal);
 
-    WriteSettings();
+    writeSettings();
 
     float dummy;
     read(dummy, dummy, dummy);
 
-    //m_settings.filter = filter;
+    //BME280::defaultSettings().filter = filter;
 }*/
 
 void BME280::set_status(int pos, int val){
@@ -37,7 +37,6 @@ void BME280::set_status(int pos, int val){
     setBit(&data, pos, val);
     device->write_reg(BME280_REGISTERS::status, data);
 }
-
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -57,13 +56,30 @@ BME280::BME280(byte chipSelect, SPIClass& spi, uint freq) { // constructor for S
 
 //---------------------------------------------Sensor Setup---------------------------------------------------
 
+void calculateCtrlRegisters(uint8_t& ctrlHum, uint8_t& config, uint8_t& ctrlMeas){
+
+
+    ctrlHum = (uint8_t)BME280::defaultSettings().humOSR;
+
+    ctrlMeas = ((uint8_t)BME280::defaultSettings().tempOSR << 5) | ((uint8_t)BME280::defaultSettings().presOSR << 2) | (uint8_t)BME280::defaultSettings().mode;
+
+    config = ((uint8_t)BME280::defaultSettings().standbyTime << 5) | ((uint8_t)BME280::defaultSettings().filter << 2) | (uint8_t)BME280::defaultSettings().spiEnable;
+
+}
+
 void BME280::writeSettings() {
 
     uint8_t ctrlHum, config, ctrlMeas;
 
+    calculateCtrlRegisters(ctrlHum, config, ctrlMeas);
+
     device->write_reg(BME280_REGISTERS::ctrl_hum, ctrlHum);
     device->write_reg(BME280_REGISTERS::config, config);
     device->write_reg(BME280_REGISTERS::ctrl_meas, ctrlMeas);
+}
+
+void BME280::default_configuration(){
+    writeSettings();
 }
 
 //---------------------------------------------Configure data---------------------------------------------------------

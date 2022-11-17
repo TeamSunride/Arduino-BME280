@@ -2,8 +2,11 @@
 #include <BME280.h>
 #include <BME280_registers.h>
 
-#define CS_pin//(s) some pins here
+#define SDA_pin 18
+#define SCL_pin 16
+#define CS_pin 10
 BME280 BME(CS_pin, SPI, 4000000); //ik ik stop bugging me
+//BME280 BME(&Wire, 1000000); // i2c protocol constructor
 
 void setup() {
     delay(1000);

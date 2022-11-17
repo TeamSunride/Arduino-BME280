@@ -47,6 +47,8 @@ public:
 
     void set_status(int pos, int val);
 
+    void default_configuration();
+
     void writeSettings();
 
     // GETS
@@ -107,6 +109,32 @@ public:
     };
 
 
+    struct defaultSettings
+        {
+            defaultSettings(
+                    OSR _tosr       = OSR_X1,
+                    OSR _hosr       = OSR_X1,
+                    OSR _posr       = OSR_X1,
+                    Mode _mode      = Mode_Forced,
+                    StandbyTime _st = StandbyTime_1000ms,
+                    Filter _filter  = Filter_Off,
+                    SpiEnable _se   = SpiEnable_True
+            ): tempOSR(_tosr),
+                    humOSR(_hosr),
+                    presOSR(_posr),
+                    mode(_mode),
+                    standbyTime(_st),
+                    filter(_filter),
+                    spiEnable(_se) {}
+
+            OSR tempOSR;
+            OSR humOSR;
+            OSR presOSR;
+            Mode mode;
+            StandbyTime standbyTime;
+            Filter filter;
+            SpiEnable spiEnable;
+        };
 
 };
 #endif //ARDUINO_BME280_BME280_H
