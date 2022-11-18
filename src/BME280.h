@@ -43,7 +43,9 @@ public:
 
     void software_reset();
 
-    byte who_am_i();
+    uint8_t who_am_i();
+
+    uint8_t showChipID();
 
     void set_status(int pos, int val);
 
@@ -59,7 +61,7 @@ public:
 
     //COnfigures
 
-    float configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short dig_T3);
+
 
 
     // ENUMS

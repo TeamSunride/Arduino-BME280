@@ -19,7 +19,8 @@ enum BME280_CONSTANTS {
     OSR_RATE_2                      = 010,
     OSR_RATE_4                      = 011,
     OSR_RATE_8                      = 100,
-    OSR_RATE_16                     = 101 // others
+    OSR_RATE_16                     = 101, // others
+    chip_id                         = 0x60 // from id reg
 
 };
 
@@ -27,6 +28,7 @@ enum BME280_CONSTANTS {
 
 struct const_values{
 public:
+    static const uint8_t BME280_chip_ID           = 0x60;
     static const uint8_t TEMP_DIG_LENGTH         = 6;
     static const uint8_t PRESS_DIG_LENGTH        = 18;
     static const uint8_t HUM_DIG_ADDR1_LENGTH    = 1;

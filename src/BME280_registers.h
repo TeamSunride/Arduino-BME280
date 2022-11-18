@@ -24,7 +24,7 @@ enum BME280_REGISTERS {
     // calib26..calib41 = 0xE1...0xF0, reset reg: 'individual'
     reset               = 0xE0, // reset reg: 0x00
     RESET_VALUE	        = 0xB6, // When written to reset reg, resets sensor
-    id                  = 0xD0, // reset reg: 0x60
+    id                  = 0xD0, // chip id is 0x60
     // calib00..calib25 = 0x88...0xA1 reset reg: 'individual'
 };
 

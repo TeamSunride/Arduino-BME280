@@ -6,13 +6,18 @@
 #include "BME280_registers.h"
 
 
-byte BME280::who_am_i() {
-    byte data;
-    return data = device->read_reg(BME280_REGISTERS::id);
+uint8_t BME280::who_am_i() {
+    uint8_t data = device->read_reg(BME280_REGISTERS::id);
+    return data;
+}
+
+uint8_t BME280::showChipID(){
+    uint8_t id = device->read_reg(BME280_REGISTERS::id);
+    return id;
 }
 
 void BME280::software_reset() {
-    int current_mode = Mode::Mode_Sleep;
+    //int current_mode = Mode::Mode_Sleep;
     device->write_reg(BME280_REGISTERS::reset, BME280_REGISTERS::RESET_VALUE);
 }
 
@@ -87,7 +92,7 @@ void BME280::default_configuration(){
 // Returns temperature in DegC, resolution is 0.01 DegC. Output value of “5123” equals 51.23 DegC.
 // t_fine carries fine temperature as global value
 int32_t t_fine;
-float BME280:: configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short dig_T3){
+float configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short dig_T3){
 
     int32_t var1, var2, T;
 
@@ -96,7 +101,7 @@ float BME280:: configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2,
 
     t_fine = var1 + var2;
     T = (t_fine * 5 + 128) >> 8;
-    set_status(3, 0);
+    //set_status(3, 0);
     return T;
 }
 
@@ -156,7 +161,7 @@ float BME280::getTemperature(){
     short dig_T2 = device->read_reg(BME280_DIG_REGISTERS::T_DIG2);
     short dig_T3 = device->read_reg(BME280_DIG_REGISTERS::T_DIG3);
 
-    set_status(3, 1);
+    //set_status(3, 1);
     return configureTemp(Temp, dig_T1, dig_T2, dig_T3);
 }
 
