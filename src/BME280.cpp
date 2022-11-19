@@ -5,15 +5,39 @@
 #include "BME280_constants.h"
 #include "BME280_registers.h"
 
+//----------------------------------------------COMMUNICATIONS PROTOCOLS-----------------------------------------------
+BME280::BME280(TwoWire *pipe, uint32_t freq) { // constructor for I2C protocol
+
+    device = new I2CProtocol(BME280_DEFAULT_I2C_ADDRESS, pipe, freq);
+
+}
+BME280::BME280(byte chipSelect, SPIClass& spi, uint freq) { // constructor for SPI protocol
+
+    SPISettings settings = SPISettings(freq, MSBFIRST, SPI_MODE3);
+    device = new SPIProtocol(chipSelect, spi, settings, READ_BYTE, WRITE_BYTE);
+}
+//----------------------------------------------------------------------------------------------------------------------
+
+byte BME280::read_reg(BME280_REGISTERS regAddress) {
+    return device->read_reg(regAddress);
+}
+
+uint8_t BME280::write_reg(BME280_REGISTERS regAddress, byte data) {
+    return device->write_reg(regAddress, data);
+}
 
 uint8_t BME280::who_am_i() {
     uint8_t data = device->read_reg(BME280_REGISTERS::id);
     return data;
 }
 
-uint8_t BME280::showChipID(){
-    uint8_t id = device->read_reg(BME280_REGISTERS::id);
-    return id;
+bool BME280::am_i_BME280(){
+    if (who_am_i() == const_values::BME280_chip_ID){
+        return true;
+    }
+    else{
+        return false;
+    }
 }
 
 void BME280::software_reset() {
@@ -47,17 +71,6 @@ void BME280::set_status(int pos, int val){
 //----------------------------------------------------------------------------------------------------------------------
 
 
-//----------------------------------------------COMMUNICATIONS PROTOCOLS-----------------------------------------------
-BME280::BME280(TwoWire *pipe, uint32_t freq) { // constructor for I2C protocol
-
-    device = new I2CProtocol(BME280_DEFAULT_I2C_ADDRESS, pipe, freq);
-
-}
-BME280::BME280(byte chipSelect, SPIClass& spi, uint freq) { // constructor for SPI protocol
-
-    SPISettings settings = SPISettings(freq, MSBFIRST, SPI_MODE3);
-    device = new SPIProtocol(chipSelect, spi, settings, READ_BYTE, WRITE_BYTE);
-}
 
 //---------------------------------------------Sensor Setup---------------------------------------------------
 
@@ -101,7 +114,7 @@ float configureTemp(int32_t raw_T, unsigned short dig_T1, short dig_T2, short di
 
     t_fine = var1 + var2;
     T = (t_fine * 5 + 128) >> 8;
-    //set_status(3, 0);
+    //set_status(3, 1);
     return T;
 }
 

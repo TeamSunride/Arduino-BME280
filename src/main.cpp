@@ -1,8 +1,8 @@
 ///*
 #include <Arduino.h>
-#include <BME280.h>
+#include "BME280.h"
 //#include <BME280_registers.h>
-#include <BME280_constants.h>
+#include "BME280_constants.h"
 // use pio run -t upload -t monitor
 #define SDA_pin 18
 #define SCL_pin 16
@@ -17,18 +17,25 @@ void setup() {
     while (!Serial) {}
     delay(2);
     BME.begin();
+    Serial.println("1");
     delay(2);
     BME.software_reset();
+    Serial.println("2");
+    delay(2);
     BME.default_configuration();
+    Serial.println("3");
 
-    if (BME.who_am_i()){
+    //uint8_t chipID = const_values::BME280_chip_ID;
+    Serial.println("4");
+    if (BME.am_i_BME280()){
         Serial.println("BME280 found!");
     }
     else{
-        uint8_t id = BME.showChipID();
-        Serial.printf("%d", id);
-        //Serial.println("BME280 not found, check the wiring.");
-        //Serial.println("Protocol stopped, please restart");
+        Serial.println("5");
+        uint8_t id = BME.who_am_i();
+        Serial.printf("%X\n", id);
+        Serial.println("BME280 not found, check the wiring.");
+        Serial.println("Protocol stopped, please restart");
         while(1); //endless loop
     }
 

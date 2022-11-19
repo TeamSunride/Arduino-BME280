@@ -40,12 +40,17 @@ public:
         device->protocol_begin();
         // any other set up etc
     }
+    byte read_reg(BME280_REGISTERS regAddress);
+
+    uint8_t write_reg(BME280_REGISTERS regAddress, byte data);
 
     void software_reset();
 
     uint8_t who_am_i();
 
-    uint8_t showChipID();
+    bool am_i_BME280();
+
+    //uint8_t showChipID();
 
     void set_status(int pos, int val);
 
@@ -58,10 +63,6 @@ public:
     float getTemperature();
     float getPressure();
     float getHumidity();
-
-    //COnfigures
-
-
 
 
     // ENUMS
@@ -117,7 +118,7 @@ public:
                     OSR _tosr       = OSR_X1,
                     OSR _hosr       = OSR_X1,
                     OSR _posr       = OSR_X1,
-                    Mode _mode      = Mode_Forced,
+                    Mode _mode      = Mode_Normal,
                     StandbyTime _st = StandbyTime_1000ms,
                     Filter _filter  = Filter_Off,
                     SpiEnable _se   = SpiEnable_True
@@ -137,6 +138,7 @@ public:
             Filter filter;
             SpiEnable spiEnable;
         };
+
 
 };
 #endif //ARDUINO_BME280_BME280_H
