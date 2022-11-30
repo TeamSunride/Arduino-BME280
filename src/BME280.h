@@ -40,9 +40,6 @@ public:
         device->protocol_begin();
         // any other set up etc
     }
-    byte read_reg(BME280_REGISTERS regAddress);
-
-    uint8_t write_reg(BME280_REGISTERS regAddress, byte data);
 
     void software_reset();
 
@@ -56,7 +53,9 @@ public:
 
     void default_configuration();
 
-    void writeSettings();
+    void writeSettings(uint8_t mode);
+
+    //void selectMode(mode);
 
     // GETS
 

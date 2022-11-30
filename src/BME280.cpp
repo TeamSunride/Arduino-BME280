@@ -18,21 +18,12 @@ BME280::BME280(byte chipSelect, SPIClass& spi, uint freq) { // constructor for S
 }
 //----------------------------------------------------------------------------------------------------------------------
 
-byte BME280::read_reg(BME280_REGISTERS regAddress) {
-    return device->read_reg(regAddress);
-}
-
-uint8_t BME280::write_reg(BME280_REGISTERS regAddress, byte data) {
-    return device->write_reg(regAddress, data);
-}
-
 uint8_t BME280::who_am_i() {
-    uint8_t data = device->read_reg(BME280_REGISTERS::id);
-    return data;
+    return device->read_reg(BME280_REGISTERS::id);
 }
 
 bool BME280::am_i_BME280(){
-    if (who_am_i() == const_values::BME280_chip_ID){
+    if (who_am_i() == BME280_CONSTANTS::chip_id){
         return true;
     }
     else{
@@ -41,7 +32,7 @@ bool BME280::am_i_BME280(){
 }
 
 void BME280::software_reset() {
-    //int current_mode = Mode::Mode_Sleep;
+    writeSettings(Mode_Sleep);
     device->write_reg(BME280_REGISTERS::reset, BME280_REGISTERS::RESET_VALUE);
 }
 
@@ -67,29 +58,28 @@ void BME280::set_status(int pos, int val){
     device->write_reg(BME280_REGISTERS::status, data);
 }
 
-
 //----------------------------------------------------------------------------------------------------------------------
 
 
 
 //---------------------------------------------Sensor Setup---------------------------------------------------
 
-void calculateCtrlRegisters(uint8_t& ctrlHum, uint8_t& config, uint8_t& ctrlMeas){
-
+void calculateCtrlRegisters(uint8_t& ctrlHum, uint8_t& config, uint8_t& ctrlMeas, uint8_t mode){
 
     ctrlHum = (uint8_t)BME280::defaultSettings().humOSR;
 
-    ctrlMeas = ((uint8_t)BME280::defaultSettings().tempOSR << 5) | ((uint8_t)BME280::defaultSettings().presOSR << 2) | (uint8_t)BME280::defaultSettings().mode;
+    ctrlMeas = ((uint8_t)BME280::defaultSettings().tempOSR << 5) | ((uint8_t)BME280::defaultSettings().presOSR << 2) | (uint8_t)mode;
 
     config = ((uint8_t)BME280::defaultSettings().standbyTime << 5) | ((uint8_t)BME280::defaultSettings().filter << 2) | (uint8_t)BME280::defaultSettings().spiEnable;
 
 }
 
-void BME280::writeSettings() {
+void BME280::writeSettings(uint8_t mode) {
 
-    uint8_t ctrlHum, config, ctrlMeas;
+    uint8_t ctrlHum, config, ctrlMeas, ctrlMeas_startup;
 
-    calculateCtrlRegisters(ctrlHum, config, ctrlMeas);
+    calculateCtrlRegisters(ctrlHum, config, ctrlMeas, mode);
+    //calculate_ctrlMeas_startup(ctrlMeas_startup);
 
     device->write_reg(BME280_REGISTERS::ctrl_hum, ctrlHum);
     device->write_reg(BME280_REGISTERS::config, config);
@@ -97,7 +87,7 @@ void BME280::writeSettings() {
 }
 
 void BME280::default_configuration(){
-    writeSettings();
+    writeSettings(Mode_Normal);
 }
 
 //---------------------------------------------Configure data---------------------------------------------------------
